@@ -18,7 +18,7 @@ const char* BASE_TOPIC_TEMPLATE = "homie/%s/%s";
 const char* TYPE_INTEGER = "integer";
 const char* TYPE_FLOAT = "float";
 const char* TYPE_DATETIME = "datetime";
-// we should never see a tera-ohm
+// we should never see a TΩ
 const char* RESISTANCE_RANGE = "0:1000000000000";
 const int WILL_QOS = 1;
 const bool WILL_RETAIN = true;
@@ -62,8 +62,6 @@ bool MqttDriver::announceDevice() {
     strcat(baseTopic, "/");
     strcat(baseTopic, PROPERTY_RAW);
     announceProperty(baseTopic, PROPERTY_RAW, TYPE_INTEGER, "0-1024", "");
-    //sprintf(baseTopic, "%s/%s/%s", _clientName, sensorNumber, PROPERTY_VOLTAGE);
-    //announceProperty(baseTopic, PROPERTY_VOLTAGE, TYPE_FLOAT, "", "V");
     sprintf(baseTopic, "%s/%s/%s", _clientName, sensorNumber, PROPERTY_RESISTANCE);
     announceProperty(baseTopic, PROPERTY_RESISTANCE, TYPE_INTEGER, RESISTANCE_RANGE, "Ω");
     

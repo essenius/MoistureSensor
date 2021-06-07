@@ -18,7 +18,8 @@ const int CURRENT_DIRECTION_PIN = D1;
 const int INHIBIT_PIN = D2;
 const int SENSOR_SELECT_PIN = D5;
 const int ANALOG_IN_PIN = A0;
-const int SAMPLE_TIME_MILLIS = 10; // for pos and neg, so total 20ms, i.e. 50 Hz 
+// SAMPLE_TIME_MILLIS is for positive and negative cycle, so total 20 ms, i.e. 50 Hz
+const int SAMPLE_TIME_MILLIS = 10; 
 
 // The overall resistance in the ADC voltage divider (100kΩ + 220kΩ) and the wall create another voltage divider. This results in 
 // fairly accurate measurements between 15 kΩ and about 1 MΩ. The walls should have a higher resistance than 1MΩ, but accuracy is 
@@ -49,7 +50,8 @@ void SensorManager::read(int sensorNumber) {
   digitalWrite(SENSOR_SELECT_PIN,_sensorNumber == 1);
   digitalWrite(INHIBIT_PIN, LOW);
   for (int i = 0; i < SAMPLE_COUNT * 2; i++) {
-   digitalWrite(LED_BUILTIN, i > SAMPLE_COUNT * 1.5 ); // Led ON during the first 3 quarters of the measurement.
+    // switch led ON during the first 3 quarters of the measurement.
+   digitalWrite(LED_BUILTIN, i > SAMPLE_COUNT * 1.5 ); 
     unsigned long lastMeasureTime = millis();
     // simulate alternating current to reduce corrosion, and read on directon LOW (i.e. using X0/Y0 on the mux)
     bool doRead = i % 2 == 0;
@@ -65,8 +67,8 @@ void SensorManager::read(int sensorNumber) {
   }
   // cut the power on the sensor, so we keep the AC symmetrical 
   digitalWrite(INHIBIT_PIN, HIGH);
-  // empirically calibrated correction factors (using resistors)
-  _correctedPinValue = _rawPinValue < 1024 ? max(_rawPinValue * 0.95 - 5.7, 0.0) : 1024;
+  // empirically calibrated correction factors (using resistors). Minimum is 1 to avoid division by zero.
+  _correctedPinValue = _rawPinValue < 1024 ? max(_rawPinValue * 0.95 - 5.7, 1.0) : 1024;
   _vOut = _correctedPinValue * V_IN / 1024.0;
   _resistance = R_REF * (V_IN - _vOut) / _vOut;
 }

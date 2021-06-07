@@ -17,7 +17,6 @@
 #include "Client.h"
 
 static const char* PROPERTY_RAW = "raw";
-//static const char* PROPERTY_VOLTAGE = "voltage";
 static const char* PROPERTY_RESISTANCE = "resistance";
 static const char* PROPERTY_NEXTRUN = "next-run";
 static const char* PROPERTY_BUILD = "build"; 

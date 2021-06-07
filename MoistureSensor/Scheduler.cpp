@@ -19,7 +19,8 @@ const time_t NON_SYNCED_TIME_UPPER_LIMIT = 16 * 3600;
 const char* NEXT_RUN_TIMESTAMP_FILE = "/nextrun_timestamp.txt";
 
 const long STARTUP_TIME_SECONDS = 15;
-const long MAX_WAIT_SECONDS_WITHOUT_SLEEP = 60; // must be larger than STARTUP_TIME_SECONDS
+ // MAX_WAIT_SECONDS_WITHOUT_SLEEP must be larger than STARTUP_TIME_SECONDS
+const long MAX_WAIT_SECONDS_WITHOUT_SLEEP = 60;
 
 // deepSleep is not very accurate. Empirically determined correction factor
 const double TIME_CORRECTION_FACTOR = 1.062;
@@ -78,7 +79,6 @@ void Scheduler::waitForNextRun(std::function<void(void)> callback) {
   while (time(nullptr) < _nextRunTimestamp) {
     digitalWrite(LED_BUILTIN, time(nullptr) % 2 == 0);
     callback();
-    //mqttDriver.processMessages();
     delay(10);
   }
   Serial.println("done waiting");
