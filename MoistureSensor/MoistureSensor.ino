@@ -35,12 +35,12 @@
 //   Encoded Root CA certificate
 //   -----END CERTIFICATE-----
 //   )rootca";
-//   static const char* CONFIG_DEVICE_CERTIFICATE = R"certdef(
+//   static const char* CONFIG_DEVICE_CERTIFICATE PROGMEM = R"certdef(
 //   -----BEGIN CERTIFICATE-----
 //   Encoded device certificate
 //   -----END CERTIFICATE-----
 //   )certdef";
-//   static const char* SECRET_DEVICE_PRIVATE_KEY = R"certkey(
+//   static const char* SECRET_DEVICE_PRIVATE_KEY PROGMEM = R"certkey(
 //   -----BEGIN PRIVATE KEY-----
 //   Encoded device private key
 //   -----END PRIVATE KEY-----
