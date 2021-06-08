@@ -30,17 +30,17 @@
 //   static const char* SECRET_MQTT_USER = "mqtt-user";
 //   static const char* SECRET_MQTT_PASSWORD = "mqtt-ueer-password";
 //   static const char* CONFIG_BASE_FIRMWARE_URL = "URL-of-OTA-images-with-trailing-slash/";
-//   static const char* CONFIG_ROOTCA_CERTIFICATE PROGMEM = R"rootca(
+//   static const char CONFIG_ROOTCA_CERTIFICATE[] PROGMEM = R"rootca(
 //   -----BEGIN CERTIFICATE-----
 //   Encoded Root CA certificate
 //   -----END CERTIFICATE-----
 //   )rootca";
-//   static const char* CONFIG_DEVICE_CERTIFICATE PROGMEM = R"certdef(
+//   static const char CONFIG_DEVICE_CERTIFICATE[] PROGMEM = R"certdef(
 //   -----BEGIN CERTIFICATE-----
 //   Encoded device certificate
 //   -----END CERTIFICATE-----
 //   )certdef";
-//   static const char* SECRET_DEVICE_PRIVATE_KEY PROGMEM = R"certkey(
+//   static const char SECRET_DEVICE_PRIVATE_KEY[] PROGMEM = R"certkey(
 //   -----BEGIN PRIVATE KEY-----
 //   Encoded device private key
 //   -----END PRIVATE KEY-----
