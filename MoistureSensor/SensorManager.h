@@ -25,10 +25,12 @@
 class SensorManager {
 public:
     void begin(int sensorCount);
+    const char* comment();
     float pinValue();
     void printResult();
     void read(int sensorNumber);
     float resistance();
+    const char* samples();
 private:
     int _sensorCount;
     int _sensorNumber;
@@ -36,6 +38,9 @@ private:
     float _correctedPinValue;
     float _vOut;
     float _resistance;
+    static const int COMMENT_SIZE = 512;
+    char _comment[COMMENT_SIZE];
+    char _samples[COMMENT_SIZE];
     
 };
 #endif

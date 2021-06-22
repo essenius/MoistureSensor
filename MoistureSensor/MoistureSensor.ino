@@ -59,7 +59,7 @@ FirmwareManager firmwareManager;
 WifiDriver wifiDriver;
 MqttDriver mqttDriver;
 
-const int BUILD_NUMBER = 14;
+const int BUILD_NUMBER = 38;
 const int SENSOR_COUNT = 2;
 const long MEASURE_INTERVAL_SECONDS = 900;
 
@@ -103,7 +103,7 @@ void setup() {
   char buildString[20];
   sprintf(buildString, "%d", BUILD_NUMBER);
   mqttDriver.publishDeviceProperty(PROPERTY_BUILD, buildString);
-
+  mqttDriver.publishDeviceProperty(PROPERTY_MAC, wifiDriver.macAddress());
   // The clock during deep sleep is not very accurate. Wait for the right time to start measuring
   nextRunTimestamp = scheduler.getNextRunTimestamp();
   publishNextRun(nextRunTimestamp);
@@ -117,11 +117,14 @@ void loop() {
       sensorManager.printResult();
       
       // Send the results over MQTT
+      mqttDriver.publishProperty(sensorNumber, PROPERTY_COMMENT, sensorManager.comment());
+      mqttDriver.publishProperty(sensorNumber, PROPERTY_SAMPLES, sensorManager.samples());
       char numberBuffer[20];
       sprintf(numberBuffer, "%.1f", sensorManager.pinValue());
       mqttDriver.publishProperty(sensorNumber, PROPERTY_RAW, numberBuffer);
       sprintf(numberBuffer, "%.0f", sensorManager.resistance());
       mqttDriver.publishProperty(sensorNumber, PROPERTY_RESISTANCE, numberBuffer);
+      
       // keep the MQTT connection active
       mqttDriver.processMessages();
     }
@@ -129,7 +132,7 @@ void loop() {
   nextRunTimestamp = scheduler.setNextRunTimestamp();
   publishNextRun(nextRunTimestamp);
   mqttDriver.disconnect();
-  firmwareManager.begin(wifiDriver.client(), CONFIG_BASE_FIRMWARE_URL, CONFIG_DEVICE_NAME);
+  firmwareManager.begin(wifiDriver.client(), CONFIG_BASE_FIRMWARE_URL, wifiDriver.macAddress());
   firmwareManager.tryUpdateFrom(BUILD_NUMBER);
   scheduler.waitForNextRun(waitCallback);
 }

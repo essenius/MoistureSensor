@@ -18,6 +18,8 @@ const char* BASE_TOPIC_TEMPLATE = "homie/%s/%s";
 const char* TYPE_INTEGER = "integer";
 const char* TYPE_FLOAT = "float";
 const char* TYPE_DATETIME = "datetime";
+const char* TYPE_STRING = "string";
+
 // we should never see a TΩ
 const char* RESISTANCE_RANGE = "0:1000000000000";
 const int WILL_QOS = 1;
@@ -47,11 +49,14 @@ bool MqttDriver::announceDevice() {
   publishEntity(_clientName, "$implementation", "esp8266");
   publishEntity(_clientName, "$extensions", "");
   sprintf(baseTopic, "%s/%s",_clientName, NODE_DEVICE);
-  announceNode(baseTopic, NODE_DEVICE, NODE_DEVICE, PROPERTY_NEXTRUN);
-  sprintf(payload, "%s,%s", PROPERTY_RAW, PROPERTY_RESISTANCE);
+  sprintf(payload, "%s,%s,%s", PROPERTY_MAC, PROPERTY_BUILD, PROPERTY_NEXTRUN);
+  announceNode(baseTopic, NODE_DEVICE, NODE_DEVICE, payload);
+  sprintf(payload, "%s,%s,%s,%s", PROPERTY_RAW, PROPERTY_RESISTANCE, PROPERTY_COMMENT, PROPERTY_SAMPLES);
   strcat(baseTopic, "/");
   strcat(baseTopic, PROPERTY_NEXTRUN);
   announceProperty(baseTopic, PROPERTY_NEXTRUN, TYPE_DATETIME, "", "");
+  sprintf(baseTopic, "%s/%s/%s", _clientName, NODE_DEVICE, PROPERTY_MAC);
+  announceProperty(baseTopic, PROPERTY_MAC, TYPE_STRING, "", "");
   sprintf(baseTopic, "%s/%s/%s", _clientName, NODE_DEVICE, PROPERTY_BUILD);
   announceProperty(baseTopic, PROPERTY_BUILD, TYPE_INTEGER, "", "");
 
@@ -64,7 +69,10 @@ bool MqttDriver::announceDevice() {
     announceProperty(baseTopic, PROPERTY_RAW, TYPE_INTEGER, "0-1024", "");
     sprintf(baseTopic, "%s/%s/%s", _clientName, sensorNumber, PROPERTY_RESISTANCE);
     announceProperty(baseTopic, PROPERTY_RESISTANCE, TYPE_INTEGER, RESISTANCE_RANGE, "Ω");
-    
+    sprintf(baseTopic, "%s/%s/%s", _clientName, sensorNumber, PROPERTY_COMMENT);
+    announceProperty(baseTopic, PROPERTY_COMMENT, TYPE_STRING, "", "");    
+    sprintf(baseTopic, "%s/%s/%s", _clientName, sensorNumber, PROPERTY_SAMPLES);
+    announceProperty(baseTopic, PROPERTY_SAMPLES, TYPE_STRING, "", "");    
   }
   setState("ready");
   return true;
@@ -90,6 +98,7 @@ void MqttDriver::announceProperty(const char* baseTopic, const char* name, const
 void MqttDriver::begin(Client* client, const char* clientName, int nodes) {
   mqttClient.setClient(*client);
   _clientName = clientName;
+  mqttClient.setBufferSize(512);
   _nodes = nodes;
 
   mqttClient.setServer(CONFIG_MQTT_BROKER, CONFIG_MQTT_PORT);

@@ -25,6 +25,10 @@ class WifiDriver {
 public:
     void begin();
     WiFiClient* client();
+    const char* macAddress();
     void printStatus();
+private:
+    static const int MAC_ADDRESS_SIZE = 14;
+    char _macAddress[MAC_ADDRESS_SIZE];
 };
 #endif

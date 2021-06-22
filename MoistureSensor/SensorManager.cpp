@@ -12,14 +12,14 @@
 #include <ESP.h>
 #include "SensorManager.h"
 
-const double ALPHA = 0.2;
-const int SAMPLE_COUNT = 25;
+const double ALPHA = 0.1;
+const int STARTUP_COUNT = 16;
+const int SAMPLE_COUNT = 16;
+const int SAMPLE_TIME_MILLIS = 10; 
 const int CURRENT_DIRECTION_PIN = D1;
 const int INHIBIT_PIN = D2;
 const int SENSOR_SELECT_PIN = D5;
 const int ANALOG_IN_PIN = A0;
-// SAMPLE_TIME_MILLIS is for positive and negative cycle, so total 20 ms, i.e. 50 Hz
-const int SAMPLE_TIME_MILLIS = 10; 
 
 // The overall resistance in the ADC voltage divider (100kΩ + 220kΩ) and the wall create another voltage divider. This results in 
 // fairly accurate measurements between 15 kΩ and about 1 MΩ. The walls should have a higher resistance than 1MΩ, but accuracy is 
@@ -34,43 +34,69 @@ void SensorManager::begin(int sensorCount) {
   pinMode(CURRENT_DIRECTION_PIN, OUTPUT);
   pinMode(SENSOR_SELECT_PIN, OUTPUT);
   digitalWrite(INHIBIT_PIN, HIGH);
+  _comment[0] = 0;
+  _samples[0] = 0;
+}
+
+const char* SensorManager::comment() {
+  return _comment;
 }
 
 void SensorManager::printResult() {
-   Serial.printf("Sensor: %d, Pin: %.1f, Corrected: %.1f, V_out: %.3f V, R_wall:%.3f MΩ\n", _sensorNumber, _rawPinValue, _correctedPinValue, _vOut, _resistance/1e6);
+  Serial.print(_comment);
 }
 
 float SensorManager::pinValue() {
-  return _correctedPinValue;
+  return _rawPinValue;
+}
+
+const char* SensorManager::samples() {
+  return _samples;
 }
 
 void SensorManager::read(int sensorNumber) {
   _sensorNumber = sensorNumber;
+  // switch on led
+  digitalWrite(LED_BUILTIN, LOW); 
   // This assumes we have at most 2 sensors, called 0 and 1.
   digitalWrite(SENSOR_SELECT_PIN,_sensorNumber == 1);
+  // switch mux to connect to ADC
+  digitalWrite(CURRENT_DIRECTION_PIN, LOW);
+  // Power up the sensor (enable the muxes)
   digitalWrite(INHIBIT_PIN, LOW);
-  for (int i = 0; i < SAMPLE_COUNT * 2; i++) {
-    // switch led ON during the first 3 quarters of the measurement.
-   digitalWrite(LED_BUILTIN, i > SAMPLE_COUNT * 1.5 ); 
-    unsigned long lastMeasureTime = millis();
-    // simulate alternating current to reduce corrosion, and read on directon LOW (i.e. using X0/Y0 on the mux)
-    bool doRead = i % 2 == 0;
-    digitalWrite(CURRENT_DIRECTION_PIN, !doRead);
-    while (millis() - lastMeasureTime < SAMPLE_TIME_MILLIS) { 
-      yield(); 
-    }
-    if (doRead) {
-      int sensorValue = analogRead(ANALOG_IN_PIN);
-      // Initialize at first value, after that do a low pass filter (averaging effect)
-      _rawPinValue = i==0 ? sensorValue : sensorValue * ALPHA + _rawPinValue * (1 - ALPHA);
-    }
+  _samples[0] = 0;
+
+  // skip the first measurements to let it settle in
+  for (int i = 0; i < STARTUP_COUNT; i++) {
+    analogRead(ANALOG_IN_PIN);
+    delay(SAMPLE_TIME_MILLIS);
   }
-  // cut the power on the sensor, so we keep the AC symmetrical 
+
+  // read a number of samples
+  for (int i = 0; i < SAMPLE_COUNT; i++) {
+    int sensorValue = analogRead(ANALOG_IN_PIN);
+    char numberBuffer[10];
+    sprintf(numberBuffer,"%d,",sensorValue);
+    strcat(_samples, numberBuffer);
+    // Initialize at first value, after that do a low pass filter (averaging effect)
+    _rawPinValue = i==0 ? sensorValue : sensorValue * ALPHA + _rawPinValue * (1 - ALPHA);
+    delay(SAMPLE_TIME_MILLIS);
+  }
+
+  // reverse the current over the wall the same amount of time to reduce corrosion of the sensor
+  digitalWrite(LED_BUILTIN, HIGH);
+  digitalWrite(CURRENT_DIRECTION_PIN, HIGH);
+  delay (SAMPLE_TIME_MILLIS * (STARTUP_COUNT + SAMPLE_COUNT));
+
+  // cut the power on the sensor 
   digitalWrite(INHIBIT_PIN, HIGH);
+
   // empirically calibrated correction factors (using resistors). Minimum is 1 to avoid division by zero.
+  // TODO: correct. The internal voltage divider has a max of 3.2V, not 3.3V.
   _correctedPinValue = _rawPinValue < 1024 ? max(_rawPinValue * 0.95 - 5.7, 1.0) : 1024;
   _vOut = _correctedPinValue * V_IN / 1024.0;
   _resistance = R_REF * (V_IN - _vOut) / _vOut;
+  sprintf(_comment, "Sensor: %d, Pin: %.1f, Corrected: %.1f, V_out: %.3f V, R_wall:%.3f MΩ\n", _sensorNumber, _rawPinValue, _correctedPinValue, _vOut, _resistance/1e6);
 }
 
 float SensorManager::resistance() {

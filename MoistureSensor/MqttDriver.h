@@ -18,8 +18,11 @@
 
 static const char* PROPERTY_RAW = "raw";
 static const char* PROPERTY_RESISTANCE = "resistance";
+static const char* PROPERTY_COMMENT = "comment";
 static const char* PROPERTY_NEXTRUN = "next-run";
+static const char* PROPERTY_SAMPLES = "samples";
 static const char* PROPERTY_BUILD = "build"; 
+static const char* PROPERTY_MAC = "mac-address";
 
 class MqttDriver {
 public:
