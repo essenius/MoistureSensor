@@ -1,4 +1,4 @@
-// Copyright 2021 Rik Essenius
+// Copyright 2021-2024 Rik Essenius
 // 
 //   Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
 //   except in compliance with the License. You may obtain a copy of the License at
@@ -16,7 +16,7 @@
 // So instead we use a 4052 multiplexer with X0 on ADC, Y0 on +3.3V (measuring) 
 // and X1 via a 320k resistor to 3.3V and Y1 to GND (reverse current). 
 // We switch port A of the 4052 with D1, and inhibit with D2.
-// The output Ports X and Y go to a second 4052 to multiplex the sensors. Two sensorsare used, selected via port A on pin D5.
+// The output Ports X and Y go to a second 4052 to multiplex the sensors. Two sensors are used, selected via port A on pin D5.
 // If 4 are needed, connect Port B of the second 4052 with e.g. D6 and change the code so it switches right.
 
 #ifndef HEADER_SENSORMANAGER
