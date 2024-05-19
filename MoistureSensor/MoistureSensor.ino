@@ -14,14 +14,7 @@
 // Dry gypsum walls should have a very high resistance (well over 1 MΩ), and lower resistance implies more moisture. 
 // Thanks to Enam (https://forum.arduino.cc/index.php?topic=195258.0) for the inspiration.
 
-// We create a voltage divider circuit via the internal resistor of the ADC port (220k and 100k) and the wall.
-// To limit corrosion we need to simulate AC. But because of those resistors (connected to GND), 
-// we can't simply reverse the current by switching between two ports.
-// So instead we use a 4052 multiplexer with X0 on ADC, Y0 on +3.3V (measuring) 
-// and X1 via a 320k resistor to 3.3V and Y1 to GND (reverse current). Ports X and Y go to the wall.
-// We switch (port A) with D1 and inhibit with D2.
-// Also connect D0 (GPIO16/WAKE) to Reset (RST) to enable wake up from deep sleep (remove while uploading).
-// We use a second 4052 to multiplex the sensors. For now two are used, selected via pin D5.
+// For a description of the circuit see SensorManager.h
 
 // After the measurement, it sends the results over MQTT and goes into deep sleep until the next measurement.
 // Also connect D0 (GPIO16/WAKE) to Reset (RST) to enable wake up from deep sleep (remove while uploading).
