@@ -61,7 +61,7 @@ FirmwareManager firmwareManager;
 WifiDriver wifiDriver;
 MqttDriver mqttDriver;
 
-const int BUILD_NUMBER = 38;
+const int BUILD_NUMBER = 40;
 const int SENSOR_COUNT = 2;
 const long MEASURE_INTERVAL_SECONDS = 900;
 
@@ -93,7 +93,10 @@ void setup() {
   sensorManager.begin(SENSOR_COUNT);
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, LOW);
-  wifiDriver.begin();
+  if (!wifiDriver.begin()) {
+    Serial.println("Could not connect to WiFi. Rebooting...");
+    ESP.restart();
+  }
   wifiDriver.printStatus();
   scheduler.begin(MEASURE_INTERVAL_SECONDS); 
   mqttDriver.begin(wifiDriver.client(), CONFIG_DEVICE_NAME, SENSOR_COUNT); 

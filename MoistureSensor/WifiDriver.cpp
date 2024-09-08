@@ -19,7 +19,7 @@ BearSSL::X509List caCert(CONFIG_ROOTCA_CERTIFICATE);
 BearSSL::X509List clientCert(CONFIG_DEVICE_CERTIFICATE);
 BearSSL::PrivateKey clientKey(SECRET_DEVICE_PRIVATE_KEY);
 
-void WifiDriver::begin() {
+bool WifiDriver::begin() {
   WiFi.mode(WIFI_STA);
   wifiClient.setClientRSACert(&clientCert, &clientKey);
   wifiClient.setTrustAnchors(&caCert);
@@ -28,10 +28,13 @@ void WifiDriver::begin() {
   }
   WiFi.begin(SECRET_SSID, SECRET_WIFI_PASSWORD);
   Serial.print("Connecting");
-  while (WiFi.status() != WL_CONNECTED) {
+  int attempts = 0;
+  while (WiFi.status() != WL_CONNECTED && attempts < 20) {
     delay(500);
+    attempts++;
     Serial.print(".");
-  }  
+  }
+  return WiFi.status() == WL_CONNECTED;  
 }
 
 WiFiClient* WifiDriver::client() {

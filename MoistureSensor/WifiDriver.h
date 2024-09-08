@@ -23,7 +23,7 @@
 
 class WifiDriver {
 public:
-    void begin();
+    bool begin();
     WiFiClient* client();
     const char* macAddress();
     void printStatus();
